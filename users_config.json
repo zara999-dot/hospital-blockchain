@@ -1,0 +1,18 @@
+{
+  "DOC-505": {
+    "role": "Doctor",
+    "public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPxeNWeutkBtxHIzjcHP0FMfeNk\nK5//CFpE7vo+PDb+1O/nC9piurfDAzrlMlbKRwxp98PEWCEvwBA+4R4g5A==\n-----END PUBLIC KEY-----\n"
+  },
+  "DOC-911": {
+    "role": "Doctor",
+    "public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAELmNkkEE5lPvRG0Yi+SPZujnZXHrH\n6O4G/eI4de+CX+T8AWsUzo8fbezIGoby17en3pjU7lf5AkVbkJ4Bhkezzw==\n-----END PUBLIC KEY-----\n"
+  },
+  "REC-101": {
+    "role": "Receptionist",
+    "public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE27OE1YJxApokfRmsjh2czRI1QLvB\n6/OGacONZvnsrr6XchdeN1OUddpy+mGwFgGvhWfcPxl0tZnfSAnnweyWzg==\n-----END PUBLIC KEY-----\n"
+  },
+  "NUR-202": {
+    "role": "Nurse",
+    "public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEUGrpy0teQkTcUJI82RBBeozpBrLL\nUqss5/LBTygXTKarj8xdhH0wHhDl+X19NnNGdJ8PBN+QgIR5etGMEWP0AA==\n-----END PUBLIC KEY-----\n"
+  }
+}

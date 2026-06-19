@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedChain - Hospital Audit System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --hacker: #ec4899;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        /* Smooth Transitions for Premium Feel */
+        body, .glass-panel, .form-control, .form-select, .nav-pills, .nav-link, .timeline-block, .hash-box, .file-card, .btn {
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+            background-attachment: fixed;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+        }
+
+        body[data-theme="light"] {
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(210, 40%, 96%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(220, 30%, 90%, 0.4) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(340, 30%, 90%, 0.2) 0, transparent 50%);
+        }
+
+        /* Theme Toggle Button Styling */
+        #theme-toggle {
+            cursor: pointer;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        #theme-toggle:hover {
+            transform: translateY(-1px) scale(1.02);
+        }
+        #theme-toggle i {
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #theme-toggle:hover i {
+            transform: rotate(45deg);
+        }
+
+        /* Light Mode Specific Overrides */
+        [data-theme="light"] .text-white {
+            color: var(--text-main) !important;
+        }
+        [data-theme="light"] .form-label {
+            color: #334155;
+        }
+        [data-theme="light"] .form-control, [data-theme="light"] .form-select {
+            background-color: rgba(255, 255, 255, 0.85);
+            color: #0f172a;
+        }
+        [data-theme="light"] .form-control:focus, [data-theme="light"] .form-select:focus {
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+        [data-theme="light"] .form-select option {
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+        [data-theme="light"] .hash-box {
+            background: rgba(15, 23, 42, 0.04);
+            border: 1px dashed rgba(15, 23, 42, 0.15);
+            color: #334155;
+        }
+        [data-theme="light"] .file-card {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px dashed rgba(15, 23, 42, 0.2);
+        }
+        [data-theme="light"] .nav-pills {
+            background: rgba(15, 23, 42, 0.05);
+        }
+        [data-theme="light"] .btn-outline-light {
+            color: #0f172a;
+            border-color: rgba(15, 23, 42, 0.15);
+        }
+        [data-theme="light"] .btn-outline-light:hover {
+            background-color: rgba(15, 23, 42, 0.05);
+            color: #0f172a;
+        }
+
+
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Stat cards layout & animation */
+        .stat-card {
+            border-left: 3px solid var(--primary-color);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .stat-card:hover {
+            border-left-color: #60a5fa;
+            transform: translateY(-4px);
+        }
+        .uppercase-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .nav-pills {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--text-muted);
+            border-radius: 8px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-pills .nav-link:hover:not(.active) {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        
+        .nav-pills .nav-link#hack-tab.active {
+            background-color: var(--hacker);
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .form-control, .form-select {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: white;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            padding: 12px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+            color: white;
+        }
+        
+        .form-select option {
+            background-color: var(--bg-color);
+            color: white;
+        }
+
+        .btn-primary { background-color: var(--primary-color); border: none; font-weight: 600; }
+        .btn-primary:hover { background-color: #2563eb; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
+        
+        .btn-hacker { background-color: var(--hacker); color: white; border: none; font-weight: 600; }
+        .btn-hacker:hover { background-color: #db2777; color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); }
+
+        .btn-outline-info { color: #38bdf8; border-color: #38bdf8; font-weight: 600; }
+        .btn-outline-info:hover { background-color: #38bdf8; color: #0f172a; box-shadow: 0 0 15px rgba(56, 189, 248, 0.5); }
+
+        .timeline-container { position: relative; padding-left: 30px; margin-top: 20px; }
+        .timeline-container::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: var(--border-color); }
+        
+        .timeline-block { 
+            position: relative; 
+            margin-bottom: 30px; 
+            animation: fadeInCascade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+            opacity: 0; 
+            transform: translateY(20px); 
+        }
+        
+        @keyframes fadeInCascade { 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .timeline-block::before {
+            content: ''; position: absolute; left: -35.5px; top: 20px; width: 14px; height: 14px;
+            border-radius: 50%; background: var(--primary-color); border: 3px solid var(--bg-color); z-index: 1;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .hash-box {
+            font-family: monospace; font-size: 0.85rem; color: #cbd5e1; word-break: break-all;
+            background: rgba(0, 0, 0, 0.4); padding: 8px; border-radius: 6px; border: 1px dashed rgba(255,255,255,0.1); margin-top: 5px; margin-bottom: 15px;
+        }
+        
+        .hash-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 2px; display: block; }
+        .badge { padding: 6px 10px; border-radius: 6px; font-weight: 500; }
+        .badge-GENESIS { background-color: #8b5cf6; color: white; }
+        .badge-UPDATE { background-color: #3b82f6; color: white; }
+        .badge-VIEW { background-color: #10b981; color: white; }
+        .badge-UNAUTHORIZED_ATTEMPT { background-color: var(--danger); color: white; }
+
+        .toast-notification {
+            position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 15px 25px; border-radius: 10px; color: white;
+            font-weight: 600; display: flex; align-items: center; gap: 10px; transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+        }
+        .toast-notification.show { transform: translateX(0); }
+        .toast-success { background: rgba(16, 185, 129, 0.9); border: 1px solid #10b981; }
+        .toast-error { background: rgba(239, 68, 68, 0.9); border: 1px solid #ef4444; }
+
+        .file-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .file-card.hacked {
+            border-color: var(--hacker);
+            box-shadow: inset 0 0 10px rgba(236, 72, 153, 0.2);
+        }
+
+        /* Tab smooth animations */
+        .tab-pane {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tab-pane.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Glowing icon */
+        .glowing-icon {
+            filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.4));
+            animation: pulseGlow 3s infinite ease-in-out;
+            display: inline-block;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.4)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.8)); transform: scale(1.05); }
+        }
+
+        /* Skeleton shimmer */
+        .skeleton-block {
+            background: linear-gradient(90deg, rgba(30,41,59,0.4) 25%, rgba(47,55,72,0.5) 50%, rgba(30,41,59,0.4) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+            border-radius: 16px;
+            height: 180px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Alert animations */
+        @keyframes pulseAlert {
+            0%, 100% { border-color: var(--danger); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+            50% { border-color: #f87171; box-shadow: 0 0 25px rgba(239, 68, 68, 0.5); }
+        }
+        .animate-pulse {
+            animation: textPulse 1.5s infinite alternate;
+        }
+        @keyframes textPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Particle Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <div id="toast" class="toast-notification">
+        <i id="toast-icon" class="bi"></i>
+        <span id="toast-message">Notification message</span>
+    </div>
+
+    <div class="container mt-5">
+        <!-- Modern Theme Toggle -->
+        <div class="d-flex justify-content-end mb-3">
+            <button id="theme-toggle" class="btn d-flex align-items-center gap-2 rounded-pill px-3 py-2 border-0 shadow-sm" style="background: var(--card-bg); backdrop-filter: blur(8px);">
+                <i id="theme-icon" class="bi bi-moon-stars-fill text-primary"></i>
+                <span id="theme-text" class="small fw-semibold text-muted">Dark Mode</span>
+            </button>
+        </div>
+        <header class="text-center mb-5 animate-pulse">
+            <h1 class="display-5 fw-bold mb-3 text-white">
+                <i class="bi bi-shield-lock text-primary me-2 glowing-icon"></i>MedChain
+            </h1>
+            <p class="lead text-muted">Immutable Healthcare Audit Dashboard</p>
+        </header>
+
+        <!-- Stats Row -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10 col-lg-8">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="glass-panel p-3 text-center stat-card" style="border-left-color: var(--primary-color);">
+                            <span class="text-muted small uppercase-label"><i class="bi bi-box me-1"></i>Total Blocks</span>
+                            <h3 class="fw-bold mt-1 text-white" id="stat-total-blocks">-</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="glass-panel p-3 text-center stat-card" style="border-left-color: #8b5cf6;">
+                            <span class="text-muted small uppercase-label"><i class="bi bi-clock me-1"></i>Last Activity</span>
+                            <h3 class="fw-bold mt-1 text-white" id="stat-last-activity" style="font-size: 1.1rem; line-height: 1.8rem; height: 1.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="glass-panel p-3 text-center stat-card" id="stat-health-card" style="border-left-color: var(--success);">
+                            <span class="text-muted small uppercase-label"><i class="bi bi-shield-check me-1"></i>Chain Status</span>
+                            <div class="mt-1" id="stat-ledger-status">
+                                <span class="badge bg-secondary">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10 col-lg-8">
+                <ul class="nav nav-pills nav-fill" id="dashboard-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="doctor-tab" data-bs-toggle="pill" data-bs-target="#doctor-view" type="button" role="tab" aria-selected="true">
+                            <i class="bi bi-shield-lock me-2"></i>Secure Logging
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="outpatient-tab" data-bs-toggle="pill" data-bs-target="#outpatient-view" type="button" role="tab" aria-selected="false">
+                            <i class="bi bi-hospital me-2"></i>Outpatient Portal
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="auditor-tab" data-bs-toggle="pill" data-bs-target="#auditor-view" type="button" role="tab" aria-selected="false">
+                            <i class="bi bi-search me-2"></i>Auditor Timeline
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="hack-tab" data-bs-toggle="pill" data-bs-target="#hack-view" type="button" role="tab" aria-selected="false">
+                            <i class="bi bi-bug me-2"></i>Live Hack Demo
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tab-content" id="dashboard-tabs-content">
+            
+            <!-- Doctor View -->
+            <div class="tab-pane fade show active" id="doctor-view" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="glass-panel p-4 p-md-5">
+                            <h3 class="mb-4">Submit Medical Record</h3>
+                            <form id="record-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Doctor / Authorised ID</label>
+                                    <select class="form-select" id="doctorId" required>
+                                        <option value="" disabled selected>Loading authorised users...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Patient ID</label>
+                                    <input type="text" class="form-control" id="patientId" placeholder="e.g., PAT-1001" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Medical Notes</label>
+                                    <textarea class="form-control" id="medicalNotes" rows="4" placeholder="Enter sensitive medical data here..." required></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-lock-fill me-2"></i>Log & Secure Record
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outpatient Portal View -->
+            <div class="tab-pane fade" id="outpatient-view" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-11">
+                        <div class="glass-panel p-4 p-md-5">
+                            
+                            <!-- Header & Status Bar -->
+                            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                                <div>
+                                    <h3 class="mb-1 text-white"><i class="bi bi-hospital me-2 text-primary"></i>Outpatient Queue & Clinical Portal</h3>
+                                    <p class="text-muted small mb-0">Role-based clinic flow from patient check-in to vital recording and prescription sealing.</p>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- SSE Connection Indicator -->
+                                    <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border-color);">
+                                        <span class="position-relative d-inline-flex" style="width: 10px; height: 10px;">
+                                            <span class="animate-ping position-absolute inline-flex h-100 w-100 rounded-full bg-success opacity-75" id="sync-ping"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-success" id="sync-dot"></span>
+                                        </span>
+                                        <span class="small fw-semibold text-muted" id="sync-status-text">Terminal Sync: Connected</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Terminal Role Switcher segment -->
+                            <div class="row mb-4 justify-content-center">
+                                <div class="col-md-8 col-lg-6">
+                                    <div class="text-center mb-2"><span class="small uppercase-label text-muted"><i class="bi bi-person-badge me-1"></i>Active Terminal Identity</span></div>
+                                    <div class="d-flex justify-content-center gap-2 p-2 rounded-3" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color);">
+                                        <button class="btn btn-sm btn-outline-info active flex-fill py-2" id="btn-role-rec" onclick="switchOutpatientRole('Receptionist')">
+                                            <i class="bi bi-clipboard-plus me-1"></i>Receptionist
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info flex-fill py-2" id="btn-role-nur" onclick="switchOutpatientRole('Nurse')">
+                                            <i class="bi bi-clipboard-pulse me-1"></i>Nurse
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info flex-fill py-2" id="btn-role-doc" onclick="switchOutpatientRole('Doctor')">
+                                            <i class="bi bi-heart-pulse me-1"></i>Doctor
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Receptionist View Content -->
+                            <div class="outpatient-role-view" id="view-rec">
+                                <div class="row g-4">
+                                    <div class="col-lg-5">
+                                        <div class="p-4 rounded-3" style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border-color);">
+                                            <h4 class="mb-3 text-white"><i class="bi bi-person-plus me-2 text-primary"></i>Register Patient</h4>
+                                            <form id="rec-register-form">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Authorized Receptionist ID</label>
+                                                    <select class="form-select form-select-sm" id="recId" required>
+                                                        <option value="REC-101" selected>REC-101 (Receptionist)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Patient Name</label>
+                                                    <input type="text" class="form-control" id="recPatientName" placeholder="e.g. John Doe" required>
+                                                </div>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <label class="form-label">Age</label>
+                                                        <input type="number" class="form-control" id="recPatientAge" placeholder="Age" min="1" max="120" required>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label">Gender</label>
+                                                        <select class="form-select" id="recPatientGender" required>
+                                                            <option value="" disabled selected>Select</option>
+                                                            <option value="Male">Male</option>
+                                                            <option value="Female">Female</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Contact Number</label>
+                                                    <input type="text" class="form-control" id="recPatientContact" placeholder="+1 (555) 000-0000" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                                    <i class="bi bi-person-check-fill me-1"></i>Register & Send to Vitals Queue
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-7">
+                                        <h4 class="mb-3 text-white"><i class="bi bi-people me-2 text-primary"></i>Clinic Queue & Active Status</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-dark table-hover align-middle border-0 rounded-3 overflow-hidden" style="background: rgba(15,23,42,0.4);">
+                                                <thead>
+                                                    <tr class="text-muted border-bottom" style="border-color: var(--border-color) !important;">
+                                                        <th class="py-3">Patient ID</th>
+                                                        <th>Name</th>
+                                                        <th>Vitals (BMI)</th>
+                                                        <th>Current Queue / Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="rec-queue-table-body">
+                                                    <tr>
+                                                        <td colspan="4" class="text-center text-muted py-4">No active patients in clinic.</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nurse View Content -->
+                            <div class="outpatient-role-view d-none" id="view-nur">
+                                <div class="row g-4">
+                                    <div class="col-lg-6">
+                                        <h4 class="mb-3 text-white"><i class="bi bi-people me-2 text-primary"></i>Patients Awaiting Vitals</h4>
+                                        <div class="list-group border-0" id="nur-patient-list" style="max-height: 400px; overflow-y: auto;">
+                                            <div class="text-center text-muted py-4 glass-panel p-3">No patients waiting in Nurse Queue.</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="p-4 rounded-3 d-none" id="nur-vitals-card" style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border-color);">
+                                            <h4 class="mb-2 text-white"><i class="bi bi-heart-pulse-fill text-danger me-2"></i>Record Vitals</h4>
+                                            <p class="text-muted small mb-3">Recording vitals for patient: <strong class="text-white" id="nur-selected-patient-name">Patient Name</strong> (<span id="nur-selected-patient-id">PAT-0000</span>)</p>
+                                            <form id="nur-vitals-form">
+                                                <input type="hidden" id="nurPatientId">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Authorized Nurse ID</label>
+                                                    <select class="form-select form-select-sm" id="nurId" required>
+                                                        <option value="NUR-202" selected>NUR-202 (Nurse)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <label class="form-label">Height (cm)</label>
+                                                        <input type="number" step="0.1" class="form-control" id="nurHeight" placeholder="e.g. 175" required oninput="calculateLiveBMI()">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label">Weight (kg)</label>
+                                                        <input type="number" step="0.1" class="form-control" id="nurWeight" placeholder="e.g. 70" required oninput="calculateLiveBMI()">
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Live BMI Display Box -->
+                                                <div class="p-2 mb-3 rounded-2 text-center d-flex justify-content-between align-items-center" id="nur-bmi-box" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); display: none;">
+                                                    <span class="text-muted small fw-semibold">Live BMI Calculation:</span>
+                                                    <div>
+                                                        <strong class="text-white" id="nur-bmi-value">-</strong>
+                                                        <span class="badge ms-2" id="nur-bmi-badge">Pending</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <label class="form-label">Blood Pressure (BP)</label>
+                                                        <input type="text" class="form-control" id="nurBP" placeholder="e.g. 120/80" required>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label">Temp (°C)</label>
+                                                        <input type="number" step="0.1" class="form-control" id="nurTemp" placeholder="e.g. 36.8" required>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-4">
+                                                    <label class="form-label">Heart Rate (bpm)</label>
+                                                    <input type="number" class="form-control" id="nurHeartRate" placeholder="e.g. 72" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i>Seal Vitals & Send to Doctor Queue
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <div class="text-center text-muted py-5 glass-panel" id="nur-vitals-placeholder">
+                                            <i class="bi bi-heart-pulse fs-1 text-muted"></i>
+                                            <p class="mt-2">Select a patient from the waiting list to record vital statistics.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Doctor View Content -->
+                            <div class="outpatient-role-view d-none" id="view-doc">
+                                <div class="row g-4">
+                                    <div class="col-lg-4">
+                                        <h4 class="mb-3 text-white"><i class="bi bi-people me-2 text-primary"></i>Patients for Consultation</h4>
+                                        <div class="list-group border-0" id="doc-patient-list" style="max-height: 400px; overflow-y: auto;">
+                                            <div class="text-center text-muted py-4 glass-panel p-3">No patients in Doctor Queue.</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div class="p-4 rounded-3 d-none" id="doc-consultation-card" style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border-color);">
+                                            <h4 class="mb-3 text-white"><i class="bi bi-clipboard2-pulse-fill text-primary me-2"></i>Consultation & Clinical Charting</h4>
+                                            
+                                            <!-- Patient Overview Box -->
+                                            <div class="row g-2 mb-4 p-3 rounded-3" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color);">
+                                                <div class="col-sm-6">
+                                                    <span class="text-muted small uppercase-label">Patient Demographics</span>
+                                                    <div class="fw-bold text-white fs-5" id="doc-p-name">Patient Name</div>
+                                                    <div class="small text-muted" id="doc-p-info">Age: - | Gender: - | ID: -</div>
+                                                </div>
+                                                <div class="col-sm-6 border-sm-start" style="border-color: var(--border-color) !important;">
+                                                    <span class="text-muted small uppercase-label">Vital Statistics (Sealed by Nurse)</span>
+                                                    <div class="row g-2 text-white small mt-1">
+                                                        <div class="col-6">Height: <strong id="doc-v-ht">-</strong> cm</div>
+                                                        <div class="col-6">Weight: <strong id="doc-v-wt">-</strong> kg</div>
+                                                        <div class="col-6">BMI: <strong id="doc-v-bmi">-</strong> <span class="badge bg-secondary py-1 px-2" id="doc-v-bmi-badge">-</span></div>
+                                                        <div class="col-6">BP: <strong id="doc-v-bp">-</strong></div>
+                                                        <div class="col-6">Temp: <strong id="doc-v-temp">-</strong> °C</div>
+                                                        <div class="col-6">Pulse: <strong id="doc-v-hr">-</strong> bpm</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <form id="doc-consultation-form">
+                                                <input type="hidden" id="docPatientId">
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-sm-6">
+                                                        <label class="form-label">Authorized Doctor ID</label>
+                                                        <select class="form-select form-select-sm" id="docId" required>
+                                                            <option value="DOC-505" selected>DOC-505 (Doctor)</option>
+                                                            <option value="DOC-911">DOC-911 (Doctor)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label class="form-label">Diagnosis / Impression</label>
+                                                        <input type="text" class="form-control form-control-sm" id="docDiagnosis" placeholder="e.g. Acute Pharyngitis" required>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Itemized Medication Scheduler -->
+                                                <div class="mb-4">
+                                                    <label class="form-label d-flex justify-content-between align-items-center">
+                                                        <span>Prescribe Medications</span>
+                                                        <button type="button" class="btn btn-xs btn-outline-info" onclick="addMedicationRow()"><i class="bi bi-plus-circle me-1"></i>Add Medication</button>
+                                                    </label>
+                                                    <div id="medication-list-container" class="mb-3">
+                                                        <!-- dynamic medication rows added here -->
+                                                    </div>
+                                                    <div class="text-center text-muted small py-2 d-none" id="med-list-empty">No medications prescribed yet. Click "Add Medication".</div>
+                                                </div>
+
+                                                <div class="row g-2 mb-4">
+                                                    <div class="col-sm-6">
+                                                        <label class="form-label">Follow-up Recommendation</label>
+                                                        <input type="date" class="form-control" id="docFollowUpDate">
+                                                    </div>
+                                                    <div class="col-sm-6 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-success w-100 py-3">
+                                                            <i class="bi bi-file-earmark-medical me-2"></i>Sign & Generate Locked Prescription
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="text-center text-muted py-5 glass-panel" id="doc-consultation-placeholder">
+                                            <i class="bi bi-prescription fs-1 text-muted"></i>
+                                            <p class="mt-2">Select a patient from the queue to review vitals and write prescription.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescription Print Modal -->
+            <div class="modal fade" id="prescriptionPrintModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(10px);">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content glass-panel border-info p-4 p-md-5" style="background: rgba(15, 23, 42, 0.95); border: 2px solid var(--primary-color);">
+                        <div class="modal-header border-0 pb-0">
+                            <h4 class="modal-title text-white"><i class="bi bi-file-earmark-medical text-primary me-2"></i>Official Digital Prescription</h4>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body py-4" id="printable-prescription-area">
+                            
+                            <!-- Prescription Print Template Header -->
+                            <div class="text-center border-bottom pb-4 mb-4" style="border-color: var(--border-color) !important;">
+                                <h2 class="fw-bold mb-0 text-white"><i class="bi bi-shield-lock text-primary me-1"></i>MEDCHAIN CLINICAL INFIRMARY</h2>
+                                <p class="text-muted small mb-0">Immutably Logged Patient Outpatient Consultation Record</p>
+                            </div>
+
+                            <!-- Patient & Vitals Meta Grid -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-2" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+                                        <span class="text-muted small uppercase-label">Patient Demographics</span>
+                                        <div class="fw-bold text-white fs-5 mt-1" id="print-p-name">Patient Name</div>
+                                        <div class="small text-muted mt-1">ID: <span id="print-p-id" class="text-white">-</span></div>
+                                        <div class="small text-muted">Age: <span id="print-p-age" class="text-white">-</span> | Gender: <span id="print-p-gender" class="text-white">-</span></div>
+                                        <div class="small text-muted">Contact: <span id="print-p-contact" class="text-white">-</span></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-2" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+                                        <span class="text-muted small uppercase-label">Patient Vitals Checklist</span>
+                                        <div class="row g-2 small mt-1 text-white-50">
+                                            <div class="col-6">Ht: <span id="print-v-ht" class="text-white">-</span> cm</div>
+                                            <div class="col-6">Wt: <span id="print-v-wt" class="text-white">-</span> kg</div>
+                                            <div class="col-6">BMI: <span id="print-v-bmi" class="text-white">-</span></div>
+                                            <div class="col-6">BP: <span id="print-v-bp" class="text-white">-</span></div>
+                                            <div class="col-6">Temp: <span id="print-v-temp" class="text-white">-</span> °C</div>
+                                            <div class="col-6">Pulse: <span id="print-v-hr" class="text-white">-</span> bpm</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Diagnosis -->
+                            <div class="mb-4">
+                                <span class="text-muted small uppercase-label">Clinical Diagnosis / Impressions</span>
+                                <div class="p-3 rounded-2 mt-1 fw-bold text-white fs-5" id="print-diagnosis" style="background: rgba(255,255,255,0.03); border-left: 4px solid var(--primary-color);">
+                                    Clinical Diagnosis Text
+                                </div>
+                            </div>
+
+                            <!-- Prescription Table -->
+                            <div class="mb-4">
+                                <span class="text-muted small uppercase-label">Medications Schedule</span>
+                                <div class="table-responsive mt-2">
+                                    <table class="table table-dark table-striped align-middle border-0 rounded-2 overflow-hidden" style="background: rgba(255,255,255,0.02);">
+                                        <thead>
+                                            <tr class="text-muted border-bottom small" style="border-color: var(--border-color) !important;">
+                                                <th class="py-2">Medication Name</th>
+                                                <th>Dosage</th>
+                                                <th>Schedule / Frequency</th>
+                                                <th class="text-end">Duration (Days)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="print-medication-table-body">
+                                            <!-- dynamic medications -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Follow up and signatures -->
+                            <div class="row g-2 mb-4 pt-3 border-top" style="border-color: var(--border-color) !important;">
+                                <div class="col-sm-6 text-white-50">
+                                    Follow-up Date: <strong id="print-followup" class="text-white">-</strong>
+                                </div>
+                                <div class="col-sm-6 text-sm-end text-white-50">
+                                    Consulting Physician: <strong id="print-doctor" class="text-white">-</strong>
+                                </div>
+                            </div>
+
+                            <!-- Cryptographic Blockchain Stamp -->
+                            <div class="p-3 rounded-3" style="background: rgba(15, 23, 42, 0.6); border: 1px dashed var(--primary-color);">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-shield-fill-check text-success fs-4 me-2"></i>
+                                    <span class="small fw-bold text-white uppercase-label text-success mb-0" style="letter-spacing: 2px;">Secured by MedChain Blockchain Seal</span>
+                                </div>
+                                <div class="row g-2 small mt-1">
+                                    <div class="col-md-6"><span class="text-muted">Sealed Document Hash:</span> <div class="text-info font-monospace text-break" id="print-seal-hash" style="font-size: 0.72rem;">-</div></div>
+                                    <div class="col-md-6"><span class="text-muted">Immutably Stamped On:</span> <div class="text-white small" id="print-seal-time">-</div></div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close Portal</button>
+                            <button type="button" class="btn btn-primary" onclick="printPrescription()"><i class="bi bi-printer-fill me-1"></i> Print / Save PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auditor View -->
+            <div class="tab-pane fade" id="auditor-view" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <div class="glass-panel p-4 p-md-5">
+                            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                                <h3><i class="bi bi-hdd-network me-2"></i>Live Ledger</h3>
+                                <div>
+                                    <button id="refresh-btn" class="btn btn-sm btn-outline-light me-2"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                                    <button id="verify-btn" class="btn btn-sm btn-outline-info me-2"><i class="bi bi-check-circle me-1"></i>Verify Ledger Integrity</button>
+                                    <button id="reset-btn" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3-fill me-1"></i>Reset Ledger</button>
+                                </div>
+                            </div>
+
+                            <!-- Integrity Verification Banner -->
+                            <div id="verification-banner" class="mb-4" style="display: none;"></div>
+
+                            <div class="timeline-container" id="timeline-container"></div>
+                            <div id="empty-state" class="text-center text-muted py-5" style="display: none;">
+                                <i class="bi bi-inbox fs-1"></i><p class="mt-2">No blocks found on the chain.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hack View -->
+            <div class="tab-pane fade" id="hack-view" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="glass-panel p-4 p-md-5">
+                            <div class="mb-4">
+                                <h3 class="text-white"><i class="bi bi-bug me-2" style="color: var(--hacker);"></i>Off-Chain Storage (Notepad Simulation)</h3>
+                                <p class="text-muted">Simulate a real-world attack. Pick an off-chain text file below, alter the data, and hit "Hack File". Then go to the Auditor Timeline and hit Verify Ledger Integrity!</p>
+                            </div>
+
+                            <!-- Hacker Success Alert Banner -->
+                            <div id="hack-alert-container" class="mb-4"></div>
+                            
+                            <div id="files-container">
+                                <!-- Hacked files rendered here -->
+                            </div>
+                            
+                            <div id="no-files-state" class="text-center text-muted py-4" style="display: none;">
+                                <i class="bi bi-file-earmark-x fs-1"></i><p>No off-chain files exist yet. Go to the Doctor Dashboard and add a record first.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Ambient Canvas Background Particles
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Dynamic particle colors based on active theme
+        function getParticleColor(alpha) {
+            const isLight = document.body.getAttribute('data-theme') === 'light';
+            return isLight ? `rgba(59, 130, 246, ${alpha * 0.65})` : `rgba(59, 130, 246, ${alpha})`;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.3 - 0.15;
+                this.speedY = Math.random() * 0.3 - 0.15;
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = getParticleColor(this.alpha);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.min(60, Math.floor(canvas.width / 20));
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, idx) => {
+                p.update();
+                p.draw();
+                // Draw connecting lines
+                for (let j = idx + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 100) {
+                        const alpha = (1 - dist / 100) * 0.15;
+                        ctx.strokeStyle = getParticleColor(alpha);
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Theme switching logic with localStorage persistence and system detection
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+
+        function setTheme(theme) {
+            if (theme === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+                themeIcon.className = 'bi bi-sun-fill text-warning';
+                themeText.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.removeAttribute('data-theme');
+                themeIcon.className = 'bi bi-moon-stars-fill text-primary';
+                themeText.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        });
+
+        // Initialize theme based on preference or system settings
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        
+        if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
+            setTheme('light');
+        } else {
+            setTheme('dark');
+        }
+
+        // Notification Toast Handler
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toast-icon');
+        const toastMessage = document.getElementById('toast-message');
+
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toast.className = 'toast-notification show';
+            if (type === 'success') {
+                toast.classList.add('toast-success');
+                toastIcon.className = 'bi bi-check-circle-fill fs-5';
+            } else {
+                toast.classList.add('toast-error');
+                toastIcon.className = 'bi bi-exclamation-triangle-fill fs-5';
+            }
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // Load statistics cards
+        async function fetchStats() {
+            try {
+                const res = await fetch('/stats');
+                if (!res.ok) return;
+                const stats = await res.json();
+                
+                // Set total blocks
+                document.getElementById('stat-total-blocks').innerText = stats.total_blocks;
+                
+                // Set last activity
+                if (stats.last_activity) {
+                    const date = new Date(stats.last_activity * 1000);
+                    document.getElementById('stat-last-activity').innerText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                } else {
+                    document.getElementById('stat-last-activity').innerText = "No Activity";
+                }
+                
+                // Set chain health badge & glow
+                const statusContainer = document.getElementById('stat-ledger-status');
+                const healthCard = document.getElementById('stat-health-card');
+                
+                if (stats.health === 'SECURE') {
+                    statusContainer.innerHTML = `<span class="badge bg-success shadow-sm animate-pulse"><i class="bi bi-shield-fill-check me-1"></i>SECURE</span>`;
+                    healthCard.style.borderLeftColor = 'var(--success)';
+                } else if (stats.health === 'TAMPERED') {
+                    statusContainer.innerHTML = `<span class="badge bg-warning text-dark shadow-sm animate-pulse"><i class="bi bi-exclamation-triangle-fill me-1"></i>TAMPERED</span>`;
+                    healthCard.style.borderLeftColor = '#f59e0b';
+                } else {
+                    statusContainer.innerHTML = `<span class="badge bg-danger shadow-sm animate-pulse"><i class="bi bi-shield-fill-x me-1"></i>COMPROMISED</span>`;
+                    healthCard.style.borderLeftColor = 'var(--danger)';
+                }
+            } catch (e) {
+                console.error("Failed to load statistics", e);
+            }
+        }
+
+        // Load available users configuration
+        async function fetchUsers() {
+            try {
+                const res = await fetch('/users');
+                if (!res.ok) return;
+                const users = await res.json();
+                const select = document.getElementById('doctorId');
+                select.innerHTML = '<option value="" disabled selected>Select Authorised Identity...</option>';
+                users.forEach(user => {
+                    select.insertAdjacentHTML('beforeend', `
+                        <option value="${user.user_id}">${user.user_id} (${user.role})</option>
+                    `);
+                });
+            } catch (e) {
+                console.error("Failed to load users", e);
+            }
+        }
+
+        // Add Record Handler
+        document.getElementById('record-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                doctor_id: document.getElementById('doctorId').value,
+                patient_id: document.getElementById('patientId').value,
+                medical_text: document.getElementById('medicalNotes').value
+            };
+            try {
+                const res = await fetch('/add_record', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(`Success! Block #${data.block_index} cryptographically sealed.`, 'success');
+                    document.getElementById('record-form').reset();
+                    fetchStats(); // Update stat cards
+                    loadHackFiles(); // Refresh hack files list
+                } else {
+                    showToast(data.error || 'Access Denied', 'error');
+                }
+            } catch(err) { 
+                showToast('Network Error', 'error'); 
+            }
+        });
+
+        // Date format helper
+        function formatTime(unixTime) { 
+            return new Date(unixTime * 1000).toLocaleString(); 
+        }
+
+        // Timeline Skeleton Loader rendering
+        function showTimelineSkeleton() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = `
+                <div class="skeleton-block"></div>
+                <div class="skeleton-block"></div>
+                <div class="skeleton-block"></div>
+            `;
+        }
+
+        // Render Ledger blocks with Staggered Cascade delay
+        async function fetchAndRenderChain() {
+            showTimelineSkeleton();
+            try {
+                const res = await fetch('/get_chain');
+                const data = await res.json();
+                const container = document.getElementById('timeline-container');
+                const empty = document.getElementById('empty-state');
+                container.innerHTML = '';
+                
+                if (data.chain.length > 0) {
+                    empty.style.display = 'none';
+                    data.chain.forEach((block, index) => {
+                        const actionClass = `badge-${block.action}`;
+                        let fileHtml = block.file_name !== 'NONE' ? `
+                            <div class="mt-2">
+                                <span class="hash-label"><i class="bi bi-file-text me-1"></i>Off-Chain File</span>
+                                <div class="text-white small mb-2">${block.file_name}</div>
+                            </div>
+                        ` : '';
+
+                        const delayMs = index * 100;
+
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="timeline-block glass-panel p-4" style="animation-delay: ${delayMs}ms;">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0 text-white">Block #${block.index}</h5>
+                                    <span class="text-muted small">${formatTime(block.timestamp)}</span>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4"><span class="text-muted small">User ID</span><div class="fw-bold text-white">${block.user_id}</div></div>
+                                    <div class="col-sm-4"><span class="text-muted small">Patient ID</span><div class="fw-bold text-white">${block.patient_id}</div></div>
+                                    <div class="col-sm-4 text-sm-end"><span class="badge ${actionClass}">${block.action}</span></div>
+                                </div>
+                                ${fileHtml}
+                                <div class="mt-3"><span class="hash-label">Off-Chain File Hash</span><div class="hash-box">${block.medical_file_hash}</div></div>
+                                <div class="mt-2"><span class="hash-label">Previous Hash</span><div class="hash-box">${block.previous_hash}</div></div>
+                                <div class="mt-2"><span class="hash-label text-primary">Block Hash</span><div class="hash-box text-primary">${block.hash}</div></div>
+                            </div>
+                        `);
+                    });
+                } else { 
+                    empty.style.display = 'block'; 
+                }
+            } catch(e) {
+                console.error("Failed to render chain timeline", e);
+            }
+        }
+
+        // Verify Integrity Event Listener
+        document.getElementById('verify-btn').addEventListener('click', async (e) => {
+            const btn = e.target;
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = 'Verifying...'; btn.disabled = true;
+            try {
+                const res = await fetch('/verify');
+                const data = await res.json();
+                
+                const banner = document.getElementById('verification-banner');
+                banner.style.display = 'block';
+                
+                if (data.overall_secure) {
+                    showToast('Success: Ledger and Off-Chain Data are perfectly intact.', 'success');
+                    banner.innerHTML = `
+                        <div class="alert alert-success border-success text-white glass-panel p-3 d-flex align-items-center" style="border-left: 5px solid var(--success) !important; background: rgba(16, 185, 129, 0.15);">
+                            <i class="bi bi-shield-fill-check fs-4 me-3 text-success"></i>
+                            <div>
+                                <strong class="text-white">System Secure:</strong> Cryptographic chain integrity verified. All local off-chain files are perfectly intact and seal-matched!
+                            </div>
+                        </div>
+                    `;
+                } else if (!data.is_valid) {
+                    showToast('CRITICAL: Blockchain cryptographically broken!', 'error');
+                    banner.innerHTML = `
+                        <div class="alert alert-danger border-danger text-white glass-panel p-3 d-flex align-items-center" style="border-left: 5px solid var(--danger) !important; background: rgba(239, 68, 68, 0.15); animation: pulseAlert 2.5s infinite;">
+                            <i class="bi bi-shield-fill-x fs-4 me-3 text-danger animate-pulse"></i>
+                            <div>
+                                <strong class="text-white">CRITICAL COMPROMISE:</strong> Blockchain linkage is cryptographically broken! Historical entries have been mutated or deleted.
+                            </div>
+                        </div>
+                    `;
+                } else if (!data.is_data_intact) {
+                    showToast('TAMPERING DETECTED: An off-chain file was modified!', 'error');
+                    banner.innerHTML = `
+                        <div class="alert alert-warning border-warning text-white glass-panel p-3 d-flex align-items-center" style="border-left: 5px solid var(--hacker) !important; background: rgba(236, 72, 153, 0.15);">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning animate-pulse"></i>
+                            <div>
+                                <strong class="text-warning">Tampering Detected:</strong> Off-chain file content has been altered dynamically. The current file signature fails to match the immutably logged hash.
+                            </div>
+                        </div>
+                    `;
+                }
+                fetchStats(); // Update health state cards
+            } catch (err) {
+                showToast('Integrity verification pipeline error.', 'error');
+            } finally { 
+                setTimeout(() => { btn.innerHTML = origHTML; btn.disabled = false; }, 600); 
+            }
+        });
+
+        // Reset Ledger Event Listener
+        document.getElementById('reset-btn').addEventListener('click', async () => {
+            if (!confirm('Are you absolutely sure you want to reset the blockchain ledger and clear off-chain files? This cannot be undone!')) {
+                return;
+            }
+            try {
+                const res = await fetch('/reset?token=admin123', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Ledger completely reset to Genesis Block.', 'success');
+                    
+                    // Clear verification banners
+                    document.getElementById('verification-banner').style.display = 'none';
+                    document.getElementById('hack-alert-container').innerHTML = '';
+                    
+                    fetchAndRenderChain();
+                    fetchStats();
+                    loadHackFiles();
+                } else {
+                    showToast(data.error || 'Failed to reset ledger', 'error');
+                }
+            } catch (err) {
+                showToast('Network error on reset', 'error');
+            }
+        });
+
+        document.getElementById('refresh-btn').addEventListener('click', fetchAndRenderChain);
+        
+        // Tab Event Listeners
+        document.getElementById('auditor-tab').addEventListener('shown.bs.tab', () => {
+            fetchAndRenderChain();
+            fetchStats();
+        });
+        document.getElementById('doctor-tab').addEventListener('shown.bs.tab', () => {
+            fetchStats();
+        });
+        document.getElementById('hack-tab').addEventListener('shown.bs.tab', () => {
+            loadHackFiles();
+        });
+
+        // Hack Simulator Logic
+        async function loadHackFiles() {
+            const container = document.getElementById('files-container');
+            const noFiles = document.getElementById('no-files-state');
+            try {
+                const res = await fetch('/get_files');
+                const files = await res.json();
+                container.innerHTML = '';
+                if(files.length > 0) {
+                    noFiles.style.display = 'none';
+                    files.forEach(file => {
+                        const id = `textarea-${file.filename.replace(/[^a-zA-Z0-9]/g, '')}`;
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="file-card" id="card-${id}">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-white fw-bold"><i class="bi bi-file-text me-2 text-info"></i>${file.filename}</span>
+                                </div>
+                                <textarea class="form-control mb-3" rows="3" id="${id}">${file.content}</textarea>
+                                <button class="btn btn-hacker btn-sm px-4 py-2" onclick="hackFile('${file.filename}', '${id}')">
+                                    <i class="bi bi-bug-fill me-1"></i> Hack File
+                                </button>
+                            </div>
+                        `);
+                    });
+                } else {
+                    noFiles.style.display = 'block';
+                }
+            } catch(e) {
+                console.error("Failed to load off-chain files", e);
+            }
+        }
+
+        async function hackFile(filename, textareaId) {
+            const newContent = document.getElementById(textareaId).value;
+            try {
+                const res = await fetch('/update_file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: filename, content: newContent })
+                });
+                if(res.ok) {
+                    document.getElementById(`card-${textareaId}`).classList.add('hacked');
+                    showToast(`HACKED: Modified '${filename}' successfully without updating the blockchain.`, 'success');
+                    
+                    // Render premium alert banner in hack view
+                    const alertContainer = document.getElementById('hack-alert-container');
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger border-danger alert-dismissible fade show glass-panel p-4" role="alert" style="border-left: 5px solid var(--danger) !important; background: rgba(239, 68, 68, 0.15); animation: pulseAlert 2.5s infinite;">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-shield-slash-fill fs-3 text-danger me-3 animate-pulse"></i>
+                                <div>
+                                    <h5 class="alert-heading fw-bold mb-1 text-white">Off-Chain Tampering Successful!</h5>
+                                    <p class="mb-0 text-white-50">File <strong>${filename}</strong> was modified directly on the off-chain file storage server. The cryptographic blockchain seal remains unchanged, causing a structural mismatch. Go to the <strong>Auditor Timeline</strong> and run the <strong>Integrity Verification Check</strong> to view detection!</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    
+                    // Auto switch to auditor tab after some time if alert isn't dismissed
+                    setTimeout(() => {
+                        fetchStats();
+                    }, 500);
+                } else {
+                    showToast('Failed to hack file', 'error');
+                }
+            } catch(e) {
+                showToast('Network error on hacking attempt', 'error');
+            }
+        }
+
+        // --- HOSPITAL OUTPATIENT SYSTEM SCRIPT ---
+        let outpatientState = { patients: {}, queue: [] };
+        let activeOutpatientRole = 'Receptionist';
+
+        // Switch role viewports
+        function switchOutpatientRole(role) {
+            activeOutpatientRole = role;
+            
+            // Toggle active classes on buttons
+            document.getElementById('btn-role-rec').classList.remove('active');
+            document.getElementById('btn-role-nur').classList.remove('active');
+            document.getElementById('btn-role-doc').classList.remove('active');
+            
+            if (role === 'Receptionist') document.getElementById('btn-role-rec').classList.add('active');
+            if (role === 'Nurse') document.getElementById('btn-role-nur').classList.add('active');
+            if (role === 'Doctor') document.getElementById('btn-role-doc').classList.add('active');
+
+            // Toggle viewports
+            document.getElementById('view-rec').classList.add('d-none');
+            document.getElementById('view-nur').classList.add('d-none');
+            document.getElementById('view-doc').classList.add('d-none');
+            
+            if (role === 'Receptionist') document.getElementById('view-rec').classList.remove('d-none');
+            if (role === 'Nurse') document.getElementById('view-nur').classList.remove('d-none');
+            if (role === 'Doctor') document.getElementById('view-doc').classList.remove('d-none');
+            
+            renderOutpatientUI();
+        }
+
+        // Fetch clinic outpatient state
+        async function fetchOutpatientState() {
+            try {
+                const res = await fetch('/outpatients/state');
+                if (res.ok) {
+                    outpatientState = await res.json();
+                    renderOutpatientUI();
+                }
+            } catch (e) {
+                console.error("Failed to load outpatient state", e);
+            }
+        }
+
+        // Main outpatient rendering coordinator
+        function renderOutpatientUI() {
+            if (activeOutpatientRole === 'Receptionist') {
+                renderReceptionistQueue();
+            } else if (activeOutpatientRole === 'Nurse') {
+                renderNurseQueue();
+            } else if (activeOutpatientRole === 'Doctor') {
+                renderDoctorQueue();
+            }
+        }
+
+        // 1. Receptionist Queue Rendering
+        function renderReceptionistQueue() {
+            const tbody = document.getElementById('rec-queue-table-body');
+            tbody.innerHTML = '';
+            
+            const patientsList = Object.values(outpatientState.patients);
+            if (patientsList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No active patients in clinic.</td></tr>`;
+                return;
+            }
+
+            // Sort by registration time descending
+            patientsList.sort((a, b) => b.registered_at - a.registered_at);
+
+            patientsList.forEach(p => {
+                const qItem = outpatientState.queue.find(item => item.patient_id === p.id);
+                let statusBadge = '';
+                
+                if (qItem) {
+                    if (qItem.status === 'NURSE') {
+                        statusBadge = '<span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Awaiting Vitals</span>';
+                    } else if (qItem.status === 'DOCTOR') {
+                        statusBadge = '<span class="badge bg-primary"><i class="bi bi-person-pulse me-1"></i>Awaiting Doctor</span>';
+                    }
+                } else {
+                    statusBadge = '<span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Completed & Sealed</span>';
+                }
+
+                const bmiText = p.vitals ? `${p.vitals.bmi} (${getBMIRating(p.vitals.bmi)})` : '<span class="text-muted small">No Vitals Yet</span>';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="border-bottom" style="border-color: var(--border-color) !important;">
+                        <td class="py-3 fw-bold text-info">${p.id}</td>
+                        <td class="text-white">${p.name} <span class="text-muted small">(${p.age} / ${p.gender})</span></td>
+                        <td>${bmiText}</td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        // 2. Nurse Queue Rendering
+        function renderNurseQueue() {
+            const list = document.getElementById('nur-patient-list');
+            list.innerHTML = '';
+            
+            const nurseQueue = outpatientState.queue.filter(item => item.status === 'NURSE');
+            if (nurseQueue.length === 0) {
+                list.innerHTML = `<div class="text-center text-muted py-4 glass-panel p-3 w-100">No patients waiting in Nurse Queue.</div>`;
+                return;
+            }
+
+            nurseQueue.sort((a, b) => a.joined_at - b.joined_at); // FIFO order
+
+            nurseQueue.forEach(item => {
+                const p = outpatientState.patients[item.patient_id];
+                if (p) {
+                    list.insertAdjacentHTML('beforeend', `
+                        <button type="button" class="list-group-item list-group-item-action bg-dark border-0 glass-panel mb-2 text-white p-3 d-flex justify-content-between align-items-center" onclick="selectPatientForVitals('${p.id}')">
+                            <div>
+                                <strong class="text-info">${p.id}</strong> - <strong class="text-white">${p.name}</strong>
+                                <div class="small text-muted">Age: ${p.age} | Gender: ${p.gender}</div>
+                            </div>
+                            <span class="badge bg-warning text-dark"><i class="bi bi-clipboard-pulse me-1"></i>Start Vitals</span>
+                        </button>
+                    `);
+                }
+            });
+        }
+
+        function selectPatientForVitals(patientId) {
+            const p = outpatientState.patients[patientId];
+            if (!p) return;
+            
+            document.getElementById('nurPatientId').value = p.id;
+            document.getElementById('nur-selected-patient-name').innerText = p.name;
+            document.getElementById('nur-selected-patient-id').innerText = p.id;
+            
+            // Reset form fields
+            document.getElementById('nurHeight').value = '';
+            document.getElementById('nurWeight').value = '';
+            document.getElementById('nurBP').value = '';
+            document.getElementById('nurTemp').value = '';
+            document.getElementById('nurHeartRate').value = '';
+            document.getElementById('nur-bmi-box').style.display = 'none';
+
+            document.getElementById('nur-vitals-card').classList.remove('d-none');
+            document.getElementById('nur-vitals-placeholder').classList.add('d-none');
+        }
+
+        // BMI helpers
+        function getBMIRating(bmi) {
+            if (bmi < 18.5) return 'Underweight';
+            if (bmi >= 18.5 && bmi < 25.0) return 'Healthy';
+            if (bmi >= 25.0 && bmi < 30.0) return 'Overweight';
+            return 'Obese';
+        }
+        
+        function getBMIBadgeClass(bmi) {
+            if (bmi < 18.5) return 'bg-warning text-dark';
+            if (bmi >= 18.5 && bmi < 25.0) return 'bg-success';
+            if (bmi >= 25.0 && bmi < 30.0) return 'bg-warning text-dark';
+            return 'bg-danger';
+        }
+
+        function calculateLiveBMI() {
+            const height = document.getElementById('nurHeight').value;
+            const weight = document.getElementById('nurWeight').value;
+            const bmiBox = document.getElementById('nur-bmi-box');
+            const bmiVal = document.getElementById('nur-bmi-value');
+            const bmiBadge = document.getElementById('nur-bmi-badge');
+
+            if (height && weight) {
+                const h_m = parseFloat(height) / 100.0;
+                const w_kg = parseFloat(weight);
+                const bmi = (w_kg / (h_m * h_m)).toFixed(2);
+                
+                bmiVal.innerText = bmi;
+                bmiBadge.innerText = getBMIRating(bmi);
+                bmiBadge.className = `badge ${getBMIBadgeClass(bmi)}`;
+                bmiBox.style.setProperty('display', 'flex', 'important');
+            } else {
+                bmiBox.style.display = 'none';
+            }
+        }
+
+        // 3. Doctor Queue Rendering
+        function renderDoctorQueue() {
+            const list = document.getElementById('doc-patient-list');
+            list.innerHTML = '';
+            
+            const doctorQueue = outpatientState.queue.filter(item => item.status === 'DOCTOR');
+            if (doctorQueue.length === 0) {
+                list.innerHTML = `<div class="text-center text-muted py-4 glass-panel p-3 w-100">No patients waiting in Doctor Queue.</div>`;
+                return;
+            }
+
+            doctorQueue.sort((a, b) => a.joined_at - b.joined_at); // FIFO order
+
+            doctorQueue.forEach(item => {
+                const p = outpatientState.patients[item.patient_id];
+                if (p) {
+                    list.insertAdjacentHTML('beforeend', `
+                        <button type="button" class="list-group-item list-group-item-action bg-dark border-0 glass-panel mb-2 text-white p-3 d-flex justify-content-between align-items-center" onclick="selectPatientForConsultation('${p.id}')">
+                            <div>
+                                <strong class="text-info">${p.id}</strong> - <strong class="text-white">${p.name}</strong>
+                                <div class="small text-muted">Vitals Sealed (BMI: ${p.vitals.bmi})</div>
+                            </div>
+                            <span class="badge bg-primary"><i class="bi bi-prescription2 me-1"></i>Consult</span>
+                        </button>
+                    `);
+                }
+            });
+        }
+
+        function selectPatientForConsultation(patientId) {
+            const p = outpatientState.patients[patientId];
+            if (!p || !p.vitals) return;
+
+            document.getElementById('docPatientId').value = p.id;
+            document.getElementById('doc-p-name').innerText = p.name;
+            document.getElementById('doc-p-info').innerText = `Age: ${p.age} | Gender: ${p.gender} | ID: ${p.id}`;
+
+            // Load vitals overview
+            document.getElementById('doc-v-ht').innerText = p.vitals.height;
+            document.getElementById('doc-v-wt').innerText = p.vitals.weight;
+            document.getElementById('doc-v-bmi').innerText = p.vitals.bmi;
+            
+            const bmiBadge = document.getElementById('doc-v-bmi-badge');
+            bmiBadge.innerText = getBMIRating(p.vitals.bmi);
+            bmiBadge.className = `badge ${getBMIBadgeClass(p.vitals.bmi)}`;
+
+            document.getElementById('doc-v-bp').innerText = p.vitals.blood_pressure;
+            document.getElementById('doc-v-temp').innerText = p.vitals.temperature;
+            document.getElementById('doc-v-hr').innerText = p.vitals.heart_rate;
+
+            // Reset form diagnosis & dynamic medications
+            document.getElementById('docDiagnosis').value = '';
+            document.getElementById('docFollowUpDate').value = '';
+            
+            const medContainer = document.getElementById('medication-list-container');
+            medContainer.innerHTML = '';
+            addMedicationRow(); // Add one default medication row
+
+            document.getElementById('doc-consultation-card').classList.remove('d-none');
+            document.getElementById('doc-consultation-placeholder').classList.add('d-none');
+        }
+
+        // Dynamic medication list items
+        let medRowCount = 0;
+        function addMedicationRow() {
+            medRowCount++;
+            const medId = `med-row-${medRowCount}`;
+            const container = document.getElementById('medication-list-container');
+            document.getElementById('med-list-empty').classList.add('d-none');
+            
+            container.insertAdjacentHTML('beforeend', `
+                <div class="row g-2 mb-2 medication-item" id="${medId}">
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control form-control-sm med-name" placeholder="Medication (e.g. Amoxicillin)" required>
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control form-control-sm med-dosage" placeholder="Dose" required>
+                    </div>
+                    <div class="col-sm-3">
+                        <select class="form-select form-select-sm med-frequency" required>
+                            <option value="Once Daily">Once Daily (1-0-0)</option>
+                            <option value="Twice Daily" selected>Twice Daily (1-0-1)</option>
+                            <option value="Three times Daily">Three times Daily (1-1-1)</option>
+                            <option value="Four times Daily">Four times Daily (1-1-1-1)</option>
+                            <option value="As Needed (PRN)">As Needed (PRN)</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="number" class="form-control form-control-sm med-duration" placeholder="Days" min="1" max="180" required>
+                    </div>
+                    <div class="col-sm-1 d-flex align-items-center justify-content-center">
+                        <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeMedicationRow('${medId}')"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function removeMedicationRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) row.remove();
+            
+            const container = document.getElementById('medication-list-container');
+            if (container.children.length === 0) {
+                document.getElementById('med-list-empty').classList.remove('d-none');
+            }
+        }
+
+        // --- SUBMIT WORKFLOW HANDLERS ---
+
+        // 1. Receptionist Submit
+        document.getElementById('rec-register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('recPatientName').value,
+                age: document.getElementById('recPatientAge').value,
+                gender: document.getElementById('recPatientGender').value,
+                contact: document.getElementById('recPatientContact').value,
+                receptionist_id: document.getElementById('recId').value
+            };
+            try {
+                const res = await fetch('/outpatients/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(`Patient registered! ID: ${data.patient_id}. Sealed on Blockchain.`, 'success');
+                    document.getElementById('rec-register-form').reset();
+                    fetchOutpatientState();
+                    fetchStats(); 
+                } else {
+                    showToast(data.error || 'Failed to register', 'error');
+                }
+            } catch(e) {
+                showToast('Network error', 'error');
+            }
+        });
+
+        // 2. Nurse Submit
+        document.getElementById('nur-vitals-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                patient_id: document.getElementById('nurPatientId').value,
+                nurse_id: document.getElementById('nurId').value,
+                height: document.getElementById('nurHeight').value,
+                weight: document.getElementById('nurWeight').value,
+                blood_pressure: document.getElementById('nurBP').value,
+                temperature: document.getElementById('nurTemp').value,
+                heart_rate: document.getElementById('nurHeartRate').value
+            };
+            try {
+                const res = await fetch('/outpatients/vitals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(`Vitals recorded! BMI: ${data.bmi}. Sealed on Blockchain.`, 'success');
+                    document.getElementById('nur-vitals-card').classList.add('d-none');
+                    document.getElementById('nur-vitals-placeholder').classList.remove('d-none');
+                    fetchOutpatientState();
+                    fetchStats();
+                } else {
+                    showToast(data.error || 'Failed to record vitals', 'error');
+                }
+            } catch(e) {
+                showToast('Network error', 'error');
+            }
+        });
+
+        // 3. Doctor Submit
+        document.getElementById('doc-consultation-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const patientId = document.getElementById('docPatientId').value;
+            const diagnosis = document.getElementById('docDiagnosis').value;
+            const followUpDate = document.getElementById('docFollowUpDate').value;
+            const doctorId = document.getElementById('docId').value;
+
+            // Compile medications schedule
+            const medications = [];
+            const medItems = document.querySelectorAll('.medication-item');
+            medItems.forEach(item => {
+                medications.push({
+                    name: item.querySelector('.med-name').value,
+                    dosage: item.querySelector('.med-dosage').value,
+                    frequency: item.querySelector('.med-frequency').value,
+                    duration: parseInt(item.querySelector('.med-duration').value)
+                });
+            });
+
+            const payload = {
+                patient_id: patientId,
+                doctor_id: doctorId,
+                diagnosis: diagnosis,
+                medications: medications,
+                follow_up_date: followUpDate
+            };
+
+            try {
+                const res = await fetch('/outpatients/consultation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(`Prescription signed & sealed on blockchain!`, 'success');
+                    
+                    // Trigger Printable Prescription Modal
+                    triggerPrescriptionPrintModal(patientId, doctorId, diagnosis, medications, followUpDate, data.prescription_hash);
+                    
+                    document.getElementById('doc-consultation-card').classList.add('d-none');
+                    document.getElementById('doc-consultation-placeholder').classList.add('d-none');
+                    fetchOutpatientState();
+                    fetchStats();
+                } else {
+                    showToast(data.error || 'Failed to consult', 'error');
+                }
+            } catch(e) {
+                showToast('Network error', 'error');
+            }
+        });
+
+        // 4. Digital Prescription Print Modal Builder
+        function triggerPrescriptionPrintModal(patientId, doctorId, diagnosis, medications, followUpDate, hashSeal) {
+            const p = outpatientState.patients[patientId];
+            if(!p || !p.vitals) return;
+
+            document.getElementById('print-p-name').innerText = p.name;
+            document.getElementById('print-p-id').innerText = p.id;
+            document.getElementById('print-p-age').innerText = p.age;
+            document.getElementById('print-p-gender').innerText = p.gender;
+            document.getElementById('print-p-contact').innerText = p.contact;
+
+            document.getElementById('print-v-ht').innerText = p.vitals.height;
+            document.getElementById('print-v-wt').innerText = p.vitals.weight;
+            document.getElementById('print-v-bmi').innerText = `${p.vitals.bmi} (${getBMIRating(p.vitals.bmi)})`;
+            document.getElementById('print-v-bp').innerText = p.vitals.blood_pressure;
+            document.getElementById('print-v-temp').innerText = p.vitals.temperature;
+            document.getElementById('print-v-hr').innerText = p.vitals.heart_rate;
+
+            document.getElementById('print-diagnosis').innerText = diagnosis;
+            document.getElementById('print-doctor').innerText = `${doctorId} (Doctor Role)`;
+            document.getElementById('print-followup').innerText = followUpDate ? new Date(followUpDate).toLocaleDateString() : 'None Scheduled';
+
+            // Medication rows
+            const tbody = document.getElementById('print-medication-table-body');
+            tbody.innerHTML = '';
+            medications.forEach(m => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="border-bottom border-secondary">
+                        <td class="py-2 text-white fw-bold">${m.name}</td>
+                        <td class="text-white-50">${m.dosage}</td>
+                        <td class="text-white-50">${m.frequency}</td>
+                        <td class="text-end text-white fw-bold">${m.duration} Days</td>
+                    </tr>
+                `);
+            });
+
+            // Cryptographic stamp details
+            document.getElementById('print-seal-hash').innerText = hashSeal;
+            document.getElementById('print-seal-time').innerText = new Date().toLocaleString() + ' (UTC)';
+
+            // Open Modal using bootstrap JS
+            const myModal = new bootstrap.Modal(document.getElementById('prescriptionPrintModal'));
+            myModal.show();
+        }
+
+        // Local print tool
+        function printPrescription() {
+            const printContent = document.getElementById('printable-prescription-area').innerHTML;
+            
+            // Build temporary window or dynamic class overrides for clean print output
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Digital Prescription - ${document.getElementById('print-p-name').innerText}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body { background: white !important; color: black !important; font-family: sans-serif; padding: 40px; }
+                        .text-white { color: black !important; }
+                        .text-muted, .text-white-50 { color: #555 !important; }
+                        .glass-panel, .rounded-2, .rounded-3 { border: 1px solid #ddd !important; background: none !important; box-shadow: none !important; }
+                        .border-info, .border-secondary { border-color: #ddd !important; }
+                        .table { color: black !important; }
+                        .table th, .table td { border-color: #ddd !important; }
+                        .text-break { word-break: break-all; }
+                        .text-success { color: #155724 !important; }
+                        .font-monospace { font-family: monospace; }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() { window.close(); }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // --- Server-Sent Events Real-time Queue Sync Listener ---
+        let outpatientEventSource = null;
+
+        function startOutpatientSyncStream() {
+            const syncPing = document.getElementById('sync-ping');
+            const syncDot = document.getElementById('sync-dot');
+            const syncText = document.getElementById('sync-status-text');
+
+            if (outpatientEventSource) {
+                outpatientEventSource.close();
+            }
+
+            outpatientEventSource = new EventSource('/outpatients/stream');
+
+            outpatientEventSource.onopen = () => {
+                syncText.innerText = "Terminal Sync: Connected";
+                syncDot.className = "relative inline-flex rounded-full h-2 w-2 bg-success";
+                syncPing.className = "animate-ping position-absolute inline-flex h-100 w-100 rounded-full bg-success opacity-75";
+            };
+
+            outpatientEventSource.onerror = (e) => {
+                syncText.innerText = "Terminal Sync: Offline (Reconnecting)";
+                syncDot.className = "relative inline-flex rounded-full h-2 w-2 bg-warning";
+                syncPing.className = "animate-ping position-absolute inline-flex h-100 w-100 rounded-full bg-warning opacity-75";
+            };
+
+            outpatientEventSource.addEventListener('message', (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'sync') {
+                        // Dynamically refresh state and reload tables!
+                        fetchOutpatientState();
+                    }
+                } catch(e) {
+                    // silent fallback
+                }
+            });
+        }
+
+        // Start SSE Connection
+        startOutpatientSyncStream();
+        fetchOutpatientState();
+
+
+        // Initial Boot
+        fetchStats();
+        fetchUsers();
+        fetchAndRenderChain();
+    </script>
+</body>
+</html>

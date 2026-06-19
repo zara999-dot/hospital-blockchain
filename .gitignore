@@ -78,3 +78,8 @@ entities.json
 # Local scratch + Claude-test artifacts
 .scratch/
 claude-test-command.md
+
+# Local blockchain/outpatient database files
+ledger.json
+outpatient_data.json
+off_chain_data/
