@@ -1,0 +1,3 @@
+[submodule "smart-op-system"]
+	path = smart-op-system
+	url = https://github.com/keerthiisree/Smart-OP-Management-System.git
