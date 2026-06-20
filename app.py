@@ -22,7 +22,10 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 # ── Config from environment (never hardcoded) ─────────────────────────────────
 RESET_TOKEN = os.environ.get("RESET_TOKEN", "")
@@ -711,6 +714,316 @@ def record_consultation():
         "message": "Consultation prescription sealed successfully.",
         "prescription_hash": medical_file_hash
     }), 201
+
+
+# ── NEW SECURE /api ENDPOINTS FOR REACT FRONTEND INTEGRATION ──────────────────
+
+@app.route("/api/demo_keys", methods=["GET"])
+def get_demo_keys():
+    """Expose public info and private keys ONLY in demo mode for UI helper convenience."""
+    if not DEMO_MODE:
+        return jsonify({"error": "This endpoint is only available in DEMO_MODE."}), 403
+    
+    # Extract private keys from environment to send to frontend for local signing
+    demo_keys = {}
+    for uid, info in USERS.items():
+        priv_pem = _load_private_key_from_env(uid)
+        demo_keys[uid] = {
+            "role": info["role"],
+            "public_key": info.get("public_key", ""),
+            "private_key": priv_pem or ""
+        }
+    return jsonify(demo_keys), 200
+
+
+@app.route("/api/queue/nurse", methods=["GET"])
+def api_get_nurse_queue():
+    with outpatient_lock:
+        waiting = []
+        printing = []
+        for item in outpatient_state["queue"]:
+            patient_id = item["patient_id"]
+            p = outpatient_state["patients"].get(patient_id)
+            if not p:
+                continue
+            
+            if item["status"] == "NURSE":
+                waiting.append({
+                    "visit_id": p["id"],
+                    "name": p["name"],
+                    "age": p["age"],
+                    "gender": p["gender"],
+                    "department": p.get("department", "General Medicine")
+                })
+            elif item["status"] == "PRINT":
+                v = p.get("vitals") or {}
+                c = p.get("consultation") or {}
+                printing.append({
+                    "visit_id": p["id"],
+                    "department": p.get("department", "General Medicine"),
+                    "doctor_name": c.get("consulted_by", "DOC-505"),
+                    "name": p["name"],
+                    "age": p["age"],
+                    "gender": p["gender"],
+                    "phone": p["contact"],
+                    "prescription_id": p["id"],
+                    "diagnosis": c.get("diagnosis", ""),
+                    "follow_up": c.get("follow_up_date", ""),
+                    "temperature": v.get("temperature", ""),
+                    "heart_rate": v.get("heart_rate", ""),
+                    "bp": v.get("blood_pressure", ""),
+                    "spo2": v.get("spo2", ""),
+                    "weight": v.get("weight", ""),
+                    "bmi": v.get("bmi", ""),
+                    "medications": c.get("medications", [])
+                })
+    return jsonify({
+        "waiting": waiting,
+        "printing": printing
+    }), 200
+
+
+@app.route("/api/queue/doctor", methods=["GET"])
+def api_get_doctor_queue():
+    with outpatient_lock:
+        waiting = []
+        for item in outpatient_state["queue"]:
+            if item["status"] == "DOCTOR":
+                patient_id = item["patient_id"]
+                p = outpatient_state["patients"].get(patient_id)
+                if not p:
+                    continue
+                v = p.get("vitals") or {}
+                waiting.append({
+                    "visit_id": p["id"],
+                    "name": p["name"],
+                    "age": p["age"],
+                    "gender": p["gender"],
+                    "temperature": v.get("temperature", ""),
+                    "bp": v.get("blood_pressure", ""),
+                    "heart_rate": v.get("heart_rate", ""),
+                    "bmi": v.get("bmi", ""),
+                    "spo2": v.get("spo2", ""),
+                    "weight": v.get("weight", "")
+                })
+    return jsonify(waiting), 200
+
+
+@app.route("/api/register", methods=["POST"])
+def api_register_patient():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing JSON body."}), 400
+        
+    name = data.get("name")
+    age = data.get("age")
+    gender = data.get("gender")
+    phone = data.get("phone") or data.get("contact")
+    receptionist_id = data.get("receptionist_id")
+    signature = data.get("signature")
+    
+    if not all([name, age, gender, phone, receptionist_id, signature]):
+        return jsonify({"error": "Missing required fields (name, age, gender, phone, receptionist_id, signature)."}), 400
+
+    if receptionist_id not in USERS:
+        return jsonify({"error": "Unauthorized receptionist ID."}), 403
+
+    # Accept patient ID from client, or generate a fallback
+    patient_id = data.get("patient_id")
+    if not patient_id:
+        patient_id = f"PAT-{uuid.uuid4().hex[:8].upper()}"
+
+    action = "REGISTER"
+    medical_text = f"Patient Registered: {name}, Age {age}, Gender {gender}"
+    medical_file_hash, file_name = save_off_chain_data(patient_id, medical_text)
+
+    # Cryptographic validation of signature received from client
+    success, message = hospital_chain.request_access(
+        patient_id, receptionist_id, action, medical_file_hash, file_name, signature
+    )
+    if not success:
+        return jsonify({"error": message}), 403
+
+    patient = {
+        "id": patient_id,
+        "name": name,
+        "age": int(age),
+        "gender": gender,
+        "contact": phone,
+        "department": data.get("department", "General Medicine"),
+        "registered_at": time.time(),
+        "vitals": None,
+        "consultation": None
+    }
+
+    with outpatient_lock:
+        outpatient_state["patients"][patient_id] = patient
+        outpatient_state["queue"].append({
+            "patient_id": patient_id,
+            "status": "NURSE",
+            "joined_at": time.time(),
+            "updated_at": time.time()
+        })
+        save_outpatient_state()
+
+    announce_sync()
+    return jsonify({
+        "message": "Patient registered successfully and block sealed.",
+        "patient_id": patient_id,
+        "visit_id": patient_id
+    }), 201
+
+
+@app.route("/api/vitals", methods=["POST"])
+def api_record_vitals():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing JSON body."}), 400
+
+    patient_id = data.get("visit_id")  # React UI sends visit_id representing patient ID
+    nurse_id = data.get("nurse_id")
+    height = data.get("height")
+    weight = data.get("weight")
+    bp = data.get("bp") or data.get("blood_pressure")
+    temp = data.get("temp") or data.get("temperature")
+    hr = data.get("hr") or data.get("heart_rate")
+    spo2 = data.get("spo2") or data.get("spO2")
+    signature = data.get("signature")
+
+    if not all([patient_id, nurse_id, height, weight, bp, temp, hr, signature]):
+        return jsonify({"error": "Missing required vitals fields or signature."}), 400
+
+    if nurse_id not in USERS:
+        return jsonify({"error": "Unauthorized nurse ID."}), 403
+
+    with outpatient_lock:
+        if patient_id not in outpatient_state["patients"]:
+            return jsonify({"error": "Patient not found."}), 404
+
+    # Calculate BMI
+    h_m = float(height) / 100.0
+    w_kg = float(weight)
+    bmi = round(w_kg / (h_m * h_m), 2)
+
+    vitals = {
+        "height": float(height),
+        "weight": float(weight),
+        "bmi": bmi,
+        "blood_pressure": bp,
+        "temperature": float(temp),
+        "heart_rate": int(hr),
+        "spo2": int(spo2) if spo2 else 98,
+        "recorded_at": time.time(),
+        "recorded_by": nurse_id
+    }
+
+    # Cryptographic validation of signature received from client
+    action = "VITALS"
+    medical_text = (
+        f"Vitals Recorded: Height {height}cm, Weight {weight}kg, BMI {bmi}, "
+        f"BP {bp}, Temp {temp}C, HR {hr}bpm"
+    )
+    medical_file_hash, file_name = save_off_chain_data(patient_id, medical_text)
+
+    success, message = hospital_chain.request_access(
+        patient_id, nurse_id, action, medical_file_hash, file_name, signature
+    )
+    if not success:
+        return jsonify({"error": message}), 403
+
+    with outpatient_lock:
+        outpatient_state["patients"][patient_id]["vitals"] = vitals
+        for item in outpatient_state["queue"]:
+            if item["patient_id"] == patient_id:
+                item["status"] = "DOCTOR"
+                item["updated_at"] = time.time()
+                break
+        save_outpatient_state()
+
+    announce_sync()
+    return jsonify({
+        "message": "Patient vitals recorded successfully and block sealed.",
+        "bmi": bmi
+    }), 201
+
+
+@app.route("/api/prescribe", methods=["POST"])
+def api_record_consultation():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing JSON body."}), 400
+
+    patient_id = data.get("visit_id")
+    doctor_id = data.get("doctor_id")
+    diagnosis = data.get("diagnosis")
+    medications = data.get("medications", [])
+    follow_up = data.get("follow_up")
+    signature = data.get("signature")
+
+    if not all([patient_id, doctor_id, diagnosis, signature]):
+        return jsonify({"error": "Missing required prescription fields or signature."}), 400
+
+    if doctor_id not in USERS:
+        return jsonify({"error": "Unauthorized doctor ID."}), 403
+
+    with outpatient_lock:
+        if patient_id not in outpatient_state["patients"]:
+            return jsonify({"error": "Patient not found."}), 404
+
+    consultation = {
+        "diagnosis": diagnosis,
+        "medications": medications,
+        "follow_up_date": follow_up,
+        "consulted_at": time.time(),
+        "consulted_by": doctor_id
+    }
+
+    # Cryptographic validation of signature received from client
+    action = "PRESCRIPTION"
+    meds_str = ", ".join(
+        [f"{m['name']} ({m['dose']} {m['frequency']} x {m['duration']}d)" for m in medications]
+    )
+    medical_text = f"Diagnosis: {diagnosis}. Prescribed: {meds_str}. Follow-up: {follow_up or 'None'}."
+    medical_file_hash, file_name = save_off_chain_data(patient_id, medical_text)
+
+    success, message = hospital_chain.request_access(
+        patient_id, doctor_id, action, medical_file_hash, file_name, signature
+    )
+    if not success:
+        return jsonify({"error": message}), 403
+
+    with outpatient_lock:
+        outpatient_state["patients"][patient_id]["consultation"] = consultation
+        for item in outpatient_state["queue"]:
+            if item["patient_id"] == patient_id:
+                item["status"] = "PRINT"
+                item["updated_at"] = time.time()
+                break
+        save_outpatient_state()
+
+    announce_sync()
+    return jsonify({
+        "message": "Consultation prescription sealed successfully.",
+        "prescription_hash": medical_file_hash
+    }), 201
+
+
+@app.route("/api/print/complete", methods=["POST"])
+def api_complete_print():
+    data = request.get_json() or {}
+    patient_id = data.get("visit_id")
+    if not patient_id:
+        return jsonify({"error": "Missing visit_id."}), 400
+
+    with outpatient_lock:
+        outpatient_state["queue"] = [
+            item for item in outpatient_state["queue"]
+            if item["patient_id"] != patient_id
+        ]
+        save_outpatient_state()
+
+    announce_sync()
+    return jsonify({"message": "Session finalized successfully"}), 200
 
 
 if __name__ == "__main__":
